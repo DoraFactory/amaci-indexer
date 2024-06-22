@@ -1,0 +1,122 @@
+# To improve query performance, we strongly suggest adding indexes to any field that you plan to filter or sort by
+# Add the `@index` or `@index(unique: true)` annotation after any non-key field
+# https://academy.subquery.network/build/graphql.html#indexing-by-non-primary-key-field
+
+# type Block @entity {
+#   id: ID! # The block hash
+#   height: BigInt!
+# }
+
+# type Transaction @entity {
+#   id: ID!
+#   blockHeight: BigInt!
+#   timestamp: String!
+# }
+
+type Round @entity {
+  id: ID! # contractAddress
+  blockHeight: BigInt!
+  txHash: String!
+  operator: String!
+  contractAddress: String!
+  circuitName: String!
+  timestamp: String!
+  votingStart: String!
+  votingEnd: String!
+  status: String!
+  period: String!
+  actionType: String!
+  roundId: String!
+  roundTitle: String!
+  roundDescription: String!
+  roundLink: String!
+  coordinatorPubkeyX: String!
+  coordinatorPubkeyY: String!
+  voteOptionMap: String!
+  results: String!
+  allResult: String!
+  maciDenom: String! @index
+  gasStationEnable: Boolean!
+  totalGrant: String!
+  baseGrant: String!
+  totalBond: String!
+  circuitType: String!
+  circuitPower: String! # state_tree_depth-int_state_tree_depth-vote_option_tree_depth-message_batch_size
+  certificationSystem: String!
+}
+
+
+type Transaction @entity {
+  id: ID! # txHash
+  blockHeight: BigInt!
+  txHash: String!
+  timestamp: String!
+  type: String!
+  status: String!
+  roundId: String!
+  circuitName: String!
+  fee: String!
+  gasUsed: BigInt!
+  gasWanted: BigInt!
+  caller: String!
+  contractAddress: String!
+}
+
+type SignUpEvent @entity {
+  id: ID! # blockNum - eventId
+  blockHeight: BigInt!
+  timestamp: String!
+  txHash: String!
+  stateIdx: Int!
+  pubKey: String!
+  balance: String!
+  contractAddress: String!
+}
+
+type PublishMessageEvent @entity {
+  id: ID! # blockNum - eventId
+  blockHeight: BigInt!
+  timestamp: String!
+  txHash: String!
+  msgChainLength: Int!
+  message: String!
+  encPubKey: String!
+  contractAddress: String!
+}
+
+type PublishDeactivateMessageEvent @entity {
+  id: ID! # blockNum - eventId
+  blockHeight: BigInt!
+  timestamp: String!
+  txHash: String!
+  msgChainLength: Int!
+  message: String!
+  encPubKey: String!
+  contractAddress: String!
+}
+
+type DeactivateMessage @entity {
+  id: ID! # blockNum - eventId
+  blockHeight: BigInt!
+  timestamp: String!
+  txHash: String!
+  deactivateMessage: String!
+  maciContractAddress: String!
+  maciOperator: String!
+}
+
+type ProofData @entity {
+  id: ID! # blockNum - eventId
+  blockHeight: BigInt!
+  timestamp: String!
+  txHash: String!
+  actionType: String! # message / tally
+  proof: String!
+  certificationSystem: String!
+  verifyResult: String!
+  # piA: String!
+  # piB: String!
+  # piC: String!
+  commitment: String!
+  contractAddress: String!
+}
