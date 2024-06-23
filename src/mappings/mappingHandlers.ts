@@ -44,9 +44,9 @@ enum RoundActionType {
 	StopTallying = 'op:stopTallying',
 }
 
-const AMACI_CODE_ID = [23];
+const AMACI_CODE_ID = [2];
 const AMACI_OPERATOR_REGISTRY_CONTRACT =
-	'dora198sxsrjvt2v2lln2ajn82ks76k97mj72mtgl7309jehd0vy8rezsdjuhfl';
+	'dora17p9rzwnnfxcjp32un9ug7yhhzgtkhvl9jfksztgw5uh69wac2pgsnah3h8';
 // const SUPPORT_CODE_ID = [13]; // testnet
 
 enum TxStatus {
@@ -280,9 +280,17 @@ export async function handleInstantiateMessage(
 			}
 		)) as unknown as Round[];
 		let gasStationEnable = false;
-		let totalGrant = '0';
-		let baseGrant = '0';
-		let totalBond = '0';
+		let totalGrant = BigInt(0);
+		let baseGrant = BigInt(0);
+		let totalBond = BigInt(0);
+
+		let dmsgChainLength = 0;
+		let msgChainLength = 0;
+		let numSignUps = 0;
+		let processedDMsgCount = 0;
+		let processedMsgCount = 0;
+		let processedUserCount = 0;
+
 		logger.info(`-------- new --------`);
 		logger.info(`gasStationEnable: ${gasStationEnable}`);
 		logger.info(`totalGrant: ${totalGrant}`);
@@ -322,6 +330,12 @@ export async function handleInstantiateMessage(
 			circuitType,
 			circuitPower,
 			certificationSystem,
+			// dmsgChainLength,
+			// msgChainLength,
+			// numSignUps,
+			// processedDMsgCount,
+			// processedMsgCount,
+			// processedUserCount,
 		});
 
 		let sender = operator;
@@ -470,6 +484,33 @@ export async function handleSignUpEvent(
 		?.value!;
 	let balance = event.event.attributes.find(attr => attr.key === 'balance')
 		?.value!;
+
+	let action_event = event.event.attributes.find(
+		attr => attr.key === 'action'
+	)?.value;
+
+	let d0 = event.event.attributes.find(attr => attr.key === 'd0')?.value;
+	let d1 = event.event.attributes.find(attr => attr.key === 'd1')?.value;
+	let d2 = event.event.attributes.find(attr => attr.key === 'd2')?.value;
+	let d3 = event.event.attributes.find(attr => attr.key === 'd3')?.value;
+
+	let d0_value = '0';
+	let d1_value = '0';
+	let d2_value = '0';
+	let d3_value = '0';
+	if (d0 !== undefined) {
+		d0_value = d0;
+	}
+	if (d1 !== undefined) {
+		d1_value = d1;
+	}
+	if (d2 !== undefined) {
+		d2_value = d2;
+	}
+	if (d3 !== undefined) {
+		d3_value = d3;
+	}
+
 	let timestamp = event.tx.block.header.time.getTime().toString();
 
 	const eventRecord = SignUpEvent.create({
@@ -481,14 +522,20 @@ export async function handleSignUpEvent(
 		pubKey,
 		balance,
 		contractAddress,
+		d0: d0_value,
+		d1: d1_value,
+		d2: d2_value,
+		d3: d3_value,
 	});
 
 	await eventRecord.save();
 	logger.info(`-----------------------------------------------------`);
-	logger.info(`------------------- SignUp Event --------------------`);
+	logger.info(
+		`------------------- ${action_event} Event --------------------`
+	);
 	logger.info(`-----------------------------------------------------`);
 	logger.info(
-		`${eventRecord.blockHeight} Save sign_up event - ${contractAddress} : ${stateIdx} ${pubKey} ${balance}`
+		`${eventRecord.blockHeight} Save ${action_event} event - ${contractAddress} : ${stateIdx} ${pubKey} ${balance}, [${d0_value}, ${d1_value}, ${d2_value}, ${d3_value}]`
 	);
 }
 
@@ -505,6 +552,7 @@ export async function handlePublishMessageEvent(
 	let enc_pub_key = event.event.attributes.find(
 		attr => attr.key === 'enc_pub_key'
 	)?.value;
+
 	if (
 		msgChainLength !== undefined &&
 		message !== undefined &&
@@ -537,8 +585,11 @@ export async function handlePublishDeactivateMessageEvent(
 	event: CosmosEvent,
 	contractAddress: string
 ): Promise<void> {
-	let msgChainLength = event.event.attributes.find(
+	let dmsgChainLength = event.event.attributes.find(
 		attr => attr.key === 'dmsg_chain_length'
+	)?.value;
+	let num_sign_ups = event.event.attributes.find(
+		attr => attr.key === 'num_sign_ups'
 	)?.value;
 	let message = event.event.attributes.find(
 		attr => attr.key === 'message'
@@ -547,7 +598,7 @@ export async function handlePublishDeactivateMessageEvent(
 		attr => attr.key === 'enc_pub_key'
 	)?.value;
 	if (
-		msgChainLength !== undefined &&
+		dmsgChainLength !== undefined &&
 		message !== undefined &&
 		enc_pub_key !== undefined
 	) {
@@ -557,7 +608,8 @@ export async function handlePublishDeactivateMessageEvent(
 			blockHeight: BigInt(event.block.block.header.height),
 			timestamp,
 			txHash: event.tx.hash,
-			msgChainLength: Number(msgChainLength)!,
+			dmsgChainLength: Number(dmsgChainLength)!,
+			numSignUps: Number(num_sign_ups),
 			message: message!,
 			encPubKey: enc_pub_key!,
 			contractAddress: contractAddress,
@@ -571,7 +623,7 @@ export async function handlePublishDeactivateMessageEvent(
 		);
 		logger.info(`-----------------------------------------------------`);
 		logger.info(
-			`${eventRecord.blockHeight} Save publish_deactivate_message event - ${contractAddress} : ${msgChainLength} ${message} ${enc_pub_key}`
+			`${eventRecord.blockHeight} Save publish_deactivate_message event - ${contractAddress} : ${dmsgChainLength} ${message} ${enc_pub_key}`
 		);
 	}
 }
@@ -759,11 +811,9 @@ export async function handleGrant(
 		attr => attr.key === 'bond_amount'
 	)!.value!;
 
-	roundRecord.totalGrant = maxAmount;
-	roundRecord.baseGrant = baseAmount;
-	roundRecord.totalBond = (
-		Number(roundRecord.totalBond) + Number(bondAmount)
-	).toString();
+	roundRecord.totalGrant = BigInt(maxAmount);
+	roundRecord.baseGrant = BigInt(baseAmount);
+	roundRecord.totalBond = BigInt(roundRecord.totalBond) + BigInt(bondAmount);
 	roundRecord.gasStationEnable = true;
 	roundRecord.save();
 }
@@ -775,8 +825,8 @@ export async function handleRevoke(
 	logger.info(`------------------- revoke`);
 	logger.info(event.event.attributes);
 	if (roundRecord.circuitPower !== '9-4-3-625') {
-		roundRecord.totalGrant = '0';
-		roundRecord.baseGrant = '0';
+		roundRecord.totalGrant = BigInt(0);
+		roundRecord.baseGrant = BigInt(0);
 		roundRecord.gasStationEnable = false;
 		roundRecord.save();
 	}
@@ -792,9 +842,7 @@ export async function handleBond(
 		attr => attr.key === 'amount'
 	)!.value!;
 
-	roundRecord.totalBond = (
-		Number(roundRecord.totalBond) + Number(bondAmount)
-	).toString();
+	roundRecord.totalBond = BigInt(roundRecord.totalBond) + BigInt(bondAmount);
 	roundRecord.save();
 }
 
@@ -809,8 +857,7 @@ export async function handleWithdraw(
 		attr => attr.key === 'amount'
 	)!.value!;
 
-	roundRecord.totalBond = (
-		Number(roundRecord.totalBond) - Number(withdrawAmount)
-	).toString();
+	roundRecord.totalBond =
+		BigInt(roundRecord.totalBond) - BigInt(withdrawAmount);
 	roundRecord.save();
 }

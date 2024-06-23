@@ -208,7 +208,7 @@
   dependencies:
     "@subql/types" "^2.1.3"
 
-"@subql/types-cosmos@latest":
+"@subql/types-cosmos@^2.2.1":
   version "2.2.1"
   resolved "https://registry.npmjs.org/@subql/types-cosmos/-/types-cosmos-2.2.1.tgz#e7e2d56f41f8ee71440c181bc613c0a0371b0369"
   integrity sha512-ni/10F9b37F+2OKYoKLtXvDpat+KCctvagXRTFuMwFwBxpbgZdwCkIZzTROHUnO4a7vT3aZa8P5EoZbc6Xn1xw==

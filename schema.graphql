@@ -37,9 +37,15 @@ type Round @entity {
   allResult: String!
   maciDenom: String! @index
   gasStationEnable: Boolean!
-  totalGrant: String!
-  baseGrant: String!
-  totalBond: String!
+  # dmsgChainLength: Int!
+  # msgChainLength: Int!
+  # numSignUps: Int!
+  # processedDMsgCount: Int!
+  # processedMsgCount: Int!
+  # processedUserCount: Int!
+  totalGrant: BigInt!
+  baseGrant: BigInt!
+  totalBond: BigInt!
   circuitType: String!
   circuitPower: String! # state_tree_depth-int_state_tree_depth-vote_option_tree_depth-message_batch_size
   certificationSystem: String!
@@ -71,6 +77,10 @@ type SignUpEvent @entity {
   pubKey: String!
   balance: String!
   contractAddress: String!
+  d0: String!
+  d1: String!
+  d2: String!
+  d3: String!
 }
 
 type PublishMessageEvent @entity {
@@ -89,7 +99,8 @@ type PublishDeactivateMessageEvent @entity {
   blockHeight: BigInt!
   timestamp: String!
   txHash: String!
-  msgChainLength: Int!
+  dmsgChainLength: Int!
+  numSignUps: Int!
   message: String!
   encPubKey: String!
   contractAddress: String!
