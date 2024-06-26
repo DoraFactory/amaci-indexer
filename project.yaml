@@ -32,7 +32,7 @@ dataSources:
     # startBlock: 1880900 # code_id is 13
     # startBlock: 2187180 # code_id is 24
     # startBlock: 2188000
-    startBlock: 384190
+    startBlock: 430980
     mapping:
       file: ./dist/index.js
       handlers:

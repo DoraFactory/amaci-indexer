@@ -44,7 +44,7 @@ enum RoundActionType {
 	StopTallying = 'op:stopTallying',
 }
 
-const AMACI_CODE_ID = [2];
+const AMACI_CODE_ID = [4];
 const AMACI_OPERATOR_REGISTRY_CONTRACT =
 	'dora17p9rzwnnfxcjp32un9ug7yhhzgtkhvl9jfksztgw5uh69wac2pgsnah3h8';
 // const SUPPORT_CODE_ID = [13]; // testnet
