@@ -15,12 +15,12 @@ repository: "https://github.com/subquery/juno-subql-starter"
 schema:
   file: ./schema.graphql
 network:
-  chainId: vota-sf
+  chainId: vota-testnet
   # This endpoint must be a public non-pruned archive node
   # We recommend providing more than one endpoint for improved reliability, performance, and uptime
   # Public nodes may be rate limited, which can affect indexing speed
   # When developing your project we suggest getting a private API key
-  endpoint: ["https://vota-sf-rpc.dorafactory.org:443"]
+  endpoint: ["https://vota-testnet-rpc.dorafactory.org:443"]
 dataSources:
   - kind: cosmos/Runtime
     # startBlock: 359775 # code_id is 4
@@ -33,7 +33,8 @@ dataSources:
     # startBlock: 2187180 # code_id is 24
     # startBlock: 2188000
     # startBlock: 430980 # round 1 test
-    startBlock: 637380 # round 2 test
+    # startBlock: 637380 # round 2 test
+    startBlock: 3011420 # testnet amaci/maci
     mapping:
       file: ./dist/index.js
       handlers:
