@@ -32,17 +32,22 @@ enum RoundActionType {
 	FundGS = 'op:fundGS',
 	WithdrawGS = 'op:withdrawGS',
 	SignUp = 'signup',
-	DeactivateKey = 'msg:deactivateKey',
+	DeactivateMsg = 'msg:deactivateMsg',
+	ProcessDeactivate = 'op:processDeactivate',
 	Vote = 'msg:vote',
 	Verify = 'op:verify',
 	Deposit = 'deposit',
 	NewKey = 'msg:newKey',
+	PreNewKey = 'msg:preNewKey',
 	StartVoting = 'op:kickoff',
 	StopVoting = 'op:end',
 	StartProcessing = 'op:startProcessing',
 	StopProcessing = 'op:stopProcessing',
 	StopTallying = 'op:stopTallying',
 }
+
+// mainnet maci code_id
+const MACI_CODE_ID = [5, 14, 26, 79];
 
 const AMACI_CODE_ID = [4];
 const AMACI_OPERATOR_REGISTRY_CONTRACT =
@@ -94,17 +99,22 @@ export async function handleMessage(msg: CosmosMessage): Promise<void> {
 			roundRecord.period = PeriodStatus.Voting;
 			roundRecord.status = RoundStatus.Ongoing;
 			roundRecord.save();
-			type = RoundActionType.Vote;
+			type = RoundActionType.DeactivateMsg;
 		} else if (actionName === 'process_deactivate_message') {
 			roundRecord.period = PeriodStatus.Voting;
 			roundRecord.status = RoundStatus.Ongoing;
 			roundRecord.save();
-			type = RoundActionType.Vote;
+			type = RoundActionType.ProcessDeactivate;
 		} else if (actionName === 'add_new_key') {
 			roundRecord.period = PeriodStatus.Voting;
 			roundRecord.status = RoundStatus.Ongoing;
 			roundRecord.save();
-			type = RoundActionType.Vote;
+			type = RoundActionType.NewKey;
+		} else if (actionName === 'pre_add_new_key') {
+			roundRecord.period = PeriodStatus.Voting;
+			roundRecord.status = RoundStatus.Ongoing;
+			roundRecord.save();
+			type = RoundActionType.PreNewKey;
 		} else if (actionName === 'stop_voting_period') {
 			roundRecord.period = PeriodStatus.Processing;
 			roundRecord.status = RoundStatus.Tallying;
@@ -194,15 +204,22 @@ export async function handleInstantiateMessage(
 		'=================== Instantiate Message ====================='
 	);
 	logger.info('=================================================');
+
+	const codeId = msg.msg.decodedMsg['codeId']['low'];
 	const CircuitMap: Record<string, string> = {
-		'0': 'MACI-1P1V',
-		'1': 'MACI-QV',
+		'0': '1P1V',
+		'1': 'QV',
 	};
-	let code_id = msg.msg.decodedMsg['codeId']['low'];
-	// if (code_id === 1) {
-	// if (code_id === 5 || code_id === 14) {
-	// if (code_id === 1) {
-	if (AMACI_CODE_ID.includes(code_id)) {
+
+	let maciType: string | null = null; // 设置默认值为 null
+	if (AMACI_CODE_ID.includes(codeId)) {
+		maciType = 'AMACI';
+	} else if (MACI_CODE_ID.includes(codeId)) {
+		maciType = 'MACI';
+	}
+
+	if (maciType !== null) {
+		// 确保 maciType 有效
 		logger.info(
 			'======================== circuit maci qf !!!!! ========================='
 		);
@@ -260,7 +277,7 @@ export async function handleInstantiateMessage(
 			msg.msg.decodedMsg['msg']['parameters']['message_batch_size'];
 		let circuitPower = `${stateTreeDepth}-${intStateTreeDepth}-${voteOptionTreeDepth}-${messageBatchSize}`;
 
-		let circuit = `${CircuitMap[circuitType]}_${circuitPower}`;
+		let circuit = `${maciType}-${CircuitMap[circuitType]}_${circuitPower}`;
 
 		let voteOptionMap = JSON.stringify(
 			Array.from({ length: Number(maxVoteOptions) }, () => '')
@@ -283,13 +300,6 @@ export async function handleInstantiateMessage(
 		let totalGrant = BigInt(0);
 		let baseGrant = BigInt(0);
 		let totalBond = BigInt(0);
-
-		let dmsgChainLength = 0;
-		let msgChainLength = 0;
-		let numSignUps = 0;
-		let processedDMsgCount = 0;
-		let processedMsgCount = 0;
-		let processedUserCount = 0;
 
 		logger.info(`-------- new --------`);
 		logger.info(`gasStationEnable: ${gasStationEnable}`);
@@ -330,12 +340,8 @@ export async function handleInstantiateMessage(
 			circuitType,
 			circuitPower,
 			certificationSystem,
-			// dmsgChainLength,
-			// msgChainLength,
-			// numSignUps,
-			// processedDMsgCount,
-			// processedMsgCount,
-			// processedUserCount,
+			codeId,
+			maciType,
 		});
 
 		let sender = operator;
@@ -405,6 +411,8 @@ export async function handleEvent(event: CosmosEvent): Promise<void> {
 		} else if (action_event === 'process_deactivate_message') {
 			await handleProofEvent(event, contractAddress, 'deactivate');
 		} else if (action_event === 'add_new_key') {
+			await handleSignUpEvent(event, contractAddress);
+		} else if (action_event === 'pre_add_new_key') {
 			await handleSignUpEvent(event, contractAddress);
 		} else if (action_event === 'set_round_info') {
 			await handleSetRoundInfoEvent(event, roundRecord);
