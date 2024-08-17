@@ -34,7 +34,7 @@ dataSources:
     # startBlock: 2188000
     # startBlock: 430980 # round 1 test
     # startBlock: 637380 # round 2 test
-    startBlock: 3011420 # testnet amaci/maci
+    startBlock: 3053137 # testnet amaci/maci
     mapping:
       file: ./dist/index.js
       handlers:
