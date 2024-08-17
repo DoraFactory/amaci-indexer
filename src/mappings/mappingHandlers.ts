@@ -52,9 +52,9 @@ enum RoundActionType {
 // testnet maci code_id
 const MACI_CODE_ID = [32];
 
-const AMACI_CODE_ID = [31];
+const AMACI_CODE_ID = [33];
 const AMACI_OPERATOR_REGISTRY_CONTRACT =
-	'dora17p9rzwnnfxcjp32un9ug7yhhzgtkhvl9jfksztgw5uh69wac2pgsnah3h8';
+	'dora1sqgs383ya7tqdsl7wlzn03qkfuz8qqd3et3laeq6tgrtyw4zxx6sqt4k0s';
 // const SUPPORT_CODE_ID = [13]; // testnet
 
 enum TxStatus {
