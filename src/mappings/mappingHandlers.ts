@@ -489,65 +489,74 @@ export async function handleSignUpEvent(
 	event: CosmosEvent,
 	contractAddress: string
 ): Promise<void> {
-	let stateIdx = event.event.attributes.find(attr => attr.key === 'state_idx')
-		?.value!;
-	let pubKey = event.event.attributes.find(attr => attr.key === 'pubkey')
-		?.value!;
-	let balance = event.event.attributes.find(attr => attr.key === 'balance')
-		?.value!;
-
-	let action_event = event.event.attributes.find(
-		attr => attr.key === 'action'
+	let stateIdx = event.event.attributes.find(
+		attr => attr.key === 'state_idx'
+	)?.value;
+	let pubKey = event.event.attributes.find(
+		attr => attr.key === 'pubkey'
+	)?.value;
+	let balance = event.event.attributes.find(
+		attr => attr.key === 'balance'
 	)?.value;
 
-	let d0 = event.event.attributes.find(attr => attr.key === 'd0')?.value;
-	let d1 = event.event.attributes.find(attr => attr.key === 'd1')?.value;
-	let d2 = event.event.attributes.find(attr => attr.key === 'd2')?.value;
-	let d3 = event.event.attributes.find(attr => attr.key === 'd3')?.value;
+	if (
+		stateIdx !== undefined &&
+		pubKey !== undefined &&
+		balance !== undefined
+	) {
+		let action_event = event.event.attributes.find(
+			attr => attr.key === 'action'
+		)?.value;
 
-	let d0_value = '0';
-	let d1_value = '0';
-	let d2_value = '0';
-	let d3_value = '0';
-	if (d0 !== undefined) {
-		d0_value = d0;
-	}
-	if (d1 !== undefined) {
-		d1_value = d1;
-	}
-	if (d2 !== undefined) {
-		d2_value = d2;
-	}
-	if (d3 !== undefined) {
-		d3_value = d3;
-	}
+		let d0 = event.event.attributes.find(attr => attr.key === 'd0')?.value;
+		let d1 = event.event.attributes.find(attr => attr.key === 'd1')?.value;
+		let d2 = event.event.attributes.find(attr => attr.key === 'd2')?.value;
+		let d3 = event.event.attributes.find(attr => attr.key === 'd3')?.value;
 
-	let timestamp = event.tx.block.header.time.getTime().toString();
+		let d0_value = '0';
+		let d1_value = '0';
+		let d2_value = '0';
+		let d3_value = '0';
+		if (d0 !== undefined) {
+			d0_value = d0;
+		}
+		if (d1 !== undefined) {
+			d1_value = d1;
+		}
+		if (d2 !== undefined) {
+			d2_value = d2;
+		}
+		if (d3 !== undefined) {
+			d3_value = d3;
+		}
 
-	const eventRecord = SignUpEvent.create({
-		id: `${event.tx.hash}-${event.msg.idx}-${event.idx}`,
-		blockHeight: BigInt(event.block.block.header.height),
-		timestamp,
-		txHash: event.tx.hash,
-		stateIdx: Number(stateIdx),
-		pubKey,
-		balance,
-		contractAddress,
-		d0: d0_value,
-		d1: d1_value,
-		d2: d2_value,
-		d3: d3_value,
-	});
+		let timestamp = event.tx.block.header.time.getTime().toString();
 
-	await eventRecord.save();
-	logger.info(`-----------------------------------------------------`);
-	logger.info(
-		`------------------- ${action_event} Event --------------------`
-	);
-	logger.info(`-----------------------------------------------------`);
-	logger.info(
-		`${eventRecord.blockHeight} Save ${action_event} event - ${contractAddress} : ${stateIdx} ${pubKey} ${balance}, [${d0_value}, ${d1_value}, ${d2_value}, ${d3_value}]`
-	);
+		const eventRecord = SignUpEvent.create({
+			id: `${event.tx.hash}-${event.msg.idx}-${event.idx}`,
+			blockHeight: BigInt(event.block.block.header.height),
+			timestamp,
+			txHash: event.tx.hash,
+			stateIdx: Number(stateIdx),
+			pubKey,
+			balance,
+			contractAddress,
+			d0: d0_value,
+			d1: d1_value,
+			d2: d2_value,
+			d3: d3_value,
+		});
+
+		await eventRecord.save();
+		logger.info(`-----------------------------------------------------`);
+		logger.info(
+			`------------------- ${action_event} Event --------------------`
+		);
+		logger.info(`-----------------------------------------------------`);
+		logger.info(
+			`${eventRecord.blockHeight} Save ${action_event} event - ${contractAddress} : ${stateIdx} ${pubKey} ${balance}, [${d0_value}, ${d1_value}, ${d2_value}, ${d3_value}]`
+		);
+	}
 }
 
 export async function handlePublishMessageEvent(
