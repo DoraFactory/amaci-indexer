@@ -51,6 +51,8 @@ type Round @entity {
   certificationSystem: String!
   codeId: String!
   maciType: String!
+  voiceCreditAmount: String!
+  preDeactivateRoot: String!
 }
 
 

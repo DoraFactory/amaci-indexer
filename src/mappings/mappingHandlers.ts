@@ -52,7 +52,7 @@ enum RoundActionType {
 // testnet maci code_id
 const MACI_CODE_ID = [32];
 
-const AMACI_CODE_ID = [33];
+const AMACI_CODE_ID = [35];
 const AMACI_OPERATOR_REGISTRY_CONTRACT =
 	'dora1sqgs383ya7tqdsl7wlzn03qkfuz8qqd3et3laeq6tgrtyw4zxx6sqt4k0s';
 // const SUPPORT_CODE_ID = [13]; // testnet
@@ -270,6 +270,13 @@ export async function handleInstantiateMessage(
 			certificationSystem = 'plonk';
 		}
 
+		// <-- only amaci
+		let voiceCreditAmount: string =
+			msg.msg.decodedMsg['msg']['voice_credit_amount'] || '0';
+		let preDeactivateRoot: string =
+			msg.msg.decodedMsg['msg']['pre_deactivate_root'] || '0';
+		// -->
+
 		let stateTreeDepth =
 			msg.msg.decodedMsg['msg']['parameters']['state_tree_depth'];
 		let intStateTreeDepth =
@@ -345,6 +352,8 @@ export async function handleInstantiateMessage(
 			certificationSystem,
 			codeId,
 			maciType,
+			voiceCreditAmount,
+			preDeactivateRoot,
 		});
 
 		let sender = operator;
