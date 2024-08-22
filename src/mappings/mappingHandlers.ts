@@ -54,7 +54,7 @@ const MACI_CODE_ID = [32];
 
 const AMACI_CODE_ID = [36];
 const AMACI_OPERATOR_REGISTRY_CONTRACT =
-	'dora1sqgs383ya7tqdsl7wlzn03qkfuz8qqd3et3laeq6tgrtyw4zxx6sqt4k0s';
+	'dora1c8cw8g8lnf4zzs9kst7xkft75apqurthejf6sf8qcw55et0aaj6sxaeeuw';
 // const SUPPORT_CODE_ID = [13]; // testnet
 
 enum TxStatus {
