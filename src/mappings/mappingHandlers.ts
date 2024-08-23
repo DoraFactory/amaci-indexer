@@ -8,6 +8,11 @@ import {
 	DeactivateMessage,
 } from '../types';
 import { CosmosEvent, CosmosMessage } from '@subql/types-cosmos';
+import {
+	MACI_CODE_ID,
+	AMACI_CODE_ID,
+	DORAHACKS_OPERATOR_REGISTRY_CONTRACT,
+} from '../config';
 
 enum RoundStatus {
 	Created = 'Created',
@@ -45,17 +50,6 @@ enum RoundActionType {
 	StopProcessing = 'op:stopProcessing',
 	StopTallying = 'op:stopTallying',
 }
-
-// // mainnet maci code_id
-// const MACI_CODE_ID = [5, 14, 26, 79];
-
-// testnet maci code_id
-const MACI_CODE_ID = [32];
-
-const AMACI_CODE_ID = [36];
-const AMACI_OPERATOR_REGISTRY_CONTRACT =
-	'dora1c8cw8g8lnf4zzs9kst7xkft75apqurthejf6sf8qcw55et0aaj6sxaeeuw';
-// const SUPPORT_CODE_ID = [13]; // testnet
 
 enum TxStatus {
 	Pending = 'Pending',
@@ -224,7 +218,7 @@ export async function handleInstantiateMessage(
 	if (maciType !== null) {
 		// 确保 maciType 有效
 		logger.info(
-			'======================== circuit maci qf !!!!! ========================='
+			`======================== circuit ${maciType} !!!!! =========================`
 		);
 		let blockHeight = msg.block.block.header.height;
 		let timestamp = msg.tx.block.header.time.getTime().toString();
@@ -408,7 +402,9 @@ export async function handleEvent(event: CosmosEvent): Promise<void> {
 	let action_event = event.event.attributes.find(
 		attr => attr.key === 'action'
 	)?.value;
-	if (contractAddress === AMACI_OPERATOR_REGISTRY_CONTRACT) {
+
+	// will upgrade
+	if (contractAddress === DORAHACKS_OPERATOR_REGISTRY_CONTRACT) {
 		handleUploadDeactivateMessageEvent(event, contractAddress);
 	}
 
